@@ -537,6 +537,16 @@ module ActiveMerchant #:nodoc:
               tx_ref_num, _ = split_authorization(parameters[:authorization])
               xml.tag! :TxRefNum, tx_ref_num
             end
+
+            if (eudd = parameters[:direct_debit])
+              xml.tag! :EUDDIBAN, eudd[:iban]
+              xml.tag! :EUDDBIC, eudd[:bic]
+              if (mandate = eudd[:mandate])
+                xml.tag! :EUDDMandateSignatureDate, mandate[:date]
+                xml.tag! :EUDDMandateID, mandate[:id]
+                xml.tag! :EUDDMandateType, mandate[:type]
+              end
+            end
           end
         end
         xml.target!
