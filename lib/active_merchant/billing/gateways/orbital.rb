@@ -28,11 +28,11 @@ module ActiveMerchant #:nodoc:
     # Company will automatically be affiliated.
 
     class OrbitalGateway < Gateway
-      API_VERSION = "5.6"
+      API_VERSION = "6.2"
 
       POST_HEADERS = {
         "MIME-Version" => "1.1",
-        "Content-Type" => "application/PTI56",
+        "Content-Type" => "application/PTI62",
         "Content-transfer-encoding" => "text",
         "Request-number" => '1',
         "Document-type" => "Request",
@@ -517,6 +517,7 @@ module ActiveMerchant #:nodoc:
             # R  - Refund and Capture no online authorization
             xml.tag! :MessageType, action
             add_bin_merchant_and_terminal(xml, parameters)
+            xml.tag! :CardBrand, 'ED' if parameters[:direct_debit]
 
             yield xml if block_given?
 
@@ -531,6 +532,10 @@ module ActiveMerchant #:nodoc:
             end
 
             set_recurring_ind(xml, parameters)
+
+            if (eudd = parameters[:direct_debit])
+              xml.tag! :EUDDCountryCode, eudd[:iban][0...2]
+            end
 
             # Append Transaction Reference Number at the end for Refund transactions
             if action == REFUND
